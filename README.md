@@ -1,1 +1,1 @@
-# taller-git-colaborativo-2
+# taller-en-clase
