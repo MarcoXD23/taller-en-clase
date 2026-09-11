@@ -2,32 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        return response()->json(['message' => 'listado de tareas']);
+        return response()->json(['data' => Task::all()]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        return response()->json(['message' => 'tarea creada'], 201);
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $task = Task::create($validated);
+
+        return response()->json(['data' => $task], 201);
     }
 
-    public function show($id)
+    public function show(Task $task): JsonResponse
     {
-        return response()->json(['message' => "mostrando tarea {$id}"]);
+        return response()->json(['data' => $task]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Task $task): JsonResponse
     {
-        return response()->json(['message' => "tarea {$id} actualizada"]);
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'completed' => 'sometimes|boolean',
+        ]);
+
+        $task->update($validated);
+
+        return response()->json(['data' => $task]);
     }
 
-    public function destroy($id)
+    public function destroy(Task $task): JsonResponse
     {
+        $task->delete();
+
         return response()->json(null, 204);
     }
 }

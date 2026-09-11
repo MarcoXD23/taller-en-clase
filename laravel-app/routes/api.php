@@ -1,19 +1,23 @@
 <?php
 
-use App\Http\Controllers\TaskController;
 use App\Http\Controllers\Api\V1\TareaController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/tasks', [TaskController::class, 'index']);
-Route::post('/tasks', [TaskController::class, 'store']);
-Route::get('/tasks/{id}', [TaskController::class, 'show']);
-Route::put('/tasks/{id}', [TaskController::class, 'update']);
-Route::delete('/tasks/{id}', [TaskController::class, 'destroy']);
-
 Route::prefix('v1')
-	->middleware('api')
-	->name('api.v1.')
-	->group(function (): void {
-		Route::apiResource('tareas', TareaController::class)
-			->whereNumber('tarea');
-	});
+    ->middleware('api')
+    ->name('api.v1.')
+    ->group(function (): void {
+        Route::apiResource('tasks', TaskController::class)
+            ->where(['task' => '[0-9]+'])
+            ->only(['index', 'show']);
+
+        Route::middleware('throttle:10,1')->group(function (): void {
+            Route::apiResource('tasks', TaskController::class)
+                ->where(['task' => '[0-9]+'])
+                ->except(['index', 'show']);
+        });
+
+        Route::apiResource('tareas', TareaController::class)
+            ->whereNumber('tarea');
+    });
